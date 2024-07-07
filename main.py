@@ -99,7 +99,8 @@ def fetch_youtube_video_info(video_url):
                 continue
         return full_data
 
-    except Exception:
+    except Exception as e:
+        print(e)
         return None
 
 def fetch_video_info(video_url):
