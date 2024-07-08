@@ -65,23 +65,25 @@ def fetch_youtube_video_info(video_url):
         }
         yt = YouTube(video_url)
         full_data['thumbnail'] = yt.thumbnail_url
-
-        for key, quality in video_info['links']['mp4'].items():
-            try:
-                quality_headers = headers.copy()
-                quality_data = {
-                    'vid': vid,
-                    'k': quality['k'],
-                }
-                quality_response = requests.post('https://www.y2mate.com/mates/convertV2/index', headers=quality_headers, data=quality_data)
-                if quality_response.status_code != 200:
-                    print(f"Error: Received status code {quality_response.status_code} for quality {quality['q']}")
+        try:
+            for key, quality in video_info['links']['mp4'].items():
+                try:
+                    quality_headers = headers.copy()
+                    quality_data = {
+                        'vid': vid,
+                        'k': quality['k'],
+                    }
+                    quality_response = requests.post('https://www.y2mate.com/mates/convertV2/index', headers=quality_headers, data=quality_data)
+                    if quality_response.status_code != 200:
+                        print(f"Error: Received status code {quality_response.status_code} for quality {quality['q']}")
+                        continue
+                    download_info = quality_response.json()
+                    full_data[quality['q']] = download_info['dlink']
+                except Exception as e:
+                    print(f"Error fetching quality {quality['q']}: {e}")
                     continue
-                download_info = quality_response.json()
-                full_data[quality['q']] = download_info['dlink']
-            except Exception as e:
-                print(f"Error fetching quality {quality['q']}: {e}")
-                continue
+        except Exception as r:
+            print(r)
         return full_data
 
     except Exception as e:
