@@ -15,7 +15,8 @@ def fetch_youtube_video_info(video_url):
         elif 'youtu.be' in url:
             parsed_url = urlparse(url)
             vid = parsed_url.path[1:]
-        print(vid)
+        print(f"Video ID: {vid}")
+
         cookies = {
             '_ga': 'GA1.1.55845380.1719854884',
             '_ga_PSRPB96YVC': 'GS1.1.1719854884.1.1.1719854910.0.0.0',
@@ -47,60 +48,46 @@ def fetch_youtube_video_info(video_url):
         }
 
         response = requests.post('https://www.y2mate.com/mates/en948/analyzeV2/ajax', cookies=cookies, headers=headers, data=data)
-        video_info = response.json()
-        vid = video_info['vid']
-
-        
-        
-        if not video_info.get('links') or not video_info['links'].get('mp4'):
+        if response.status_code != 200:
+            print(f"Error: Received status code {response.status_code}")
             return None
 
-        full_data = {}
-        full_data['platform'] = 'youtube'
-        full_data['title'] = video_info['title']
+        video_info = response.json()
+        print(f"Video Info: {video_info}")
+
+        if 'vid' not in video_info or not video_info.get('links') or not video_info['links'].get('mp4'):
+            print("Error: Video information is incomplete or missing")
+            return None
+
+        vid = video_info['vid']
+        full_data = {
+            'platform': 'youtube',
+            'title': video_info['title']
+        }
+
         yt = YouTube(video_url)
-        thumbnail_url = yt.thumbnail_url
-        full_data['thumbnail'] = thumbnail_url
+        full_data['thumbnail'] = yt.thumbnail_url
 
         for key, quality in video_info['links']['mp4'].items():
             try:
-                quality_cookies = {
-                    '_ga': 'GA1.1.55845380.1719854884',
-                    '_ga_PSRPB96YVC': 'GS1.1.1719854884.1.1.1719854910.0.0.0',
-                }
-
-                quality_headers = {
-                    'accept': '*/*',
-                    'accept-language': 'en-US,en;q=0.9',
-                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'dnt': '1',
-                    'origin': 'https://www.y2mate.com',
-                    'priority': 'u=1, i',
-                    'referer': f'https://www.y2mate.com/youtube/{vid}',
-                    'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Microsoft Edge";v="126"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'empty',
-                    'sec-fetch-mode': 'cors',
-                    'sec-fetch-site': 'same-origin',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0',
-                    'x-requested-with': 'XMLHttpRequest',
-                }
-
+                quality_headers = headers.copy()
                 quality_data = {
                     'vid': vid,
                     'k': quality['k'],
                 }
-
-                quality_response = requests.post('https://www.y2mate.com/mates/convertV2/index', cookies=quality_cookies, headers=quality_headers, data=quality_data)
+                quality_response = requests.post('https://www.y2mate.com/mates/convertV2/index', headers=quality_headers, data=quality_data)
+                if quality_response.status_code != 200:
+                    print(f"Error: Received status code {quality_response.status_code} for quality {quality['q']}")
+                    continue
                 download_info = quality_response.json()
                 full_data[quality['q']] = download_info['dlink']
-            except Exception:
+            except Exception as e:
+                print(f"Error fetching quality {quality['q']}: {e}")
                 continue
         return full_data
 
     except Exception as e:
-        print(e)
+        print(f"An error occurred: {e}")
         return None
 
 def fetch_video_info(video_url):
