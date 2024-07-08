@@ -61,8 +61,6 @@ def fetch_youtube_video_info(video_url):
         full_data['thumbnail'] = thumbnail_url
         try:
             for key, quality in video_info['links']['mp4'].items():
-                print(key)
-                print(quality)
                 try:
                     quality_cookies = {
                         '_ga': 'GA1.1.55845380.1719854884',
@@ -94,14 +92,12 @@ def fetch_youtube_video_info(video_url):
 
                     quality_response = requests.post('https://www.y2mate.com/mates/convertV2/index', cookies=quality_cookies, headers=quality_headers, data=quality_data)
                     download_info = quality_response.json()
-                    print(quality_response.status_code())
                     full_data[quality['q']] = download_info['dlink']
-                except Exception as e:
-                    print(e)
+                except Exception:
                     continue
-            return full_data
-        except Exception as r:
-            print(r)
+        except Exception as q:
+            print(q)
+        return full_data
 
     except Exception:
         return None
