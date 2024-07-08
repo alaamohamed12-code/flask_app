@@ -70,6 +70,7 @@ def fetch_youtube_video_info(video_url):
         full_data['thumbnail'] = yt.thumbnail_url
 
         for key, quality in video_info['links']['mp4'].items():
+            print(key ,quality )
             try:
                 quality_headers = headers.copy()
                 quality_data = {
