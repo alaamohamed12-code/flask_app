@@ -199,14 +199,13 @@
     <div class="text-center" id="ad-area-2"></div>
     <div class="container">
         {% if video_info %}
-        <!-- <h1>{{ video_info }}</h1> -->
         <div class="video-info {{ video_info['platform'] }}" style="display: flex; flex-direction: row; gap: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-top: 20px;">
             <div class="video-thumbnail" style="flex: 1;">
                 <img src="{{ video_info['thumbnail'] }}" alt="Thumbnail" style="width: 100%; border-radius: 8px;">
             </div>
             <div class="video-details" style="flex: 2; padding-left: 20px;">
                 <h2 style="margin-bottom: 10px;">{{ video_info['title'] }}</h2>
-                
+
                 {% if video_info['platform'] == 'tiktok' %}
                 <div class="download-links">
                     <h3 style="margin-bottom: 10px;">روابط التنزيل:</h3>
@@ -218,7 +217,6 @@
                             <a href="{{ video_info['mp3'] }}" class="download-btn" target="_blank" style="display: block; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: auto; padding-top: 0px;">
                                 Download mp3
                             </a>
-                            
                         </li>
                     </ul>
                 </div>
@@ -244,9 +242,22 @@
                         {% for quality, link in video_info.items() %}
                         {% if loop.index > 3 %}
                         <li style="margin-bottom: 10px;">
-                            <a href="{{ link }}" class="download-btn" target="_blank" style="display: block; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-                                {{ quality }}
-                            </a>
+                            <button id="downloadBtn-{{ loop.index }}" style="display: block; padding: 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">{{ quality }}</button>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    document.getElementById('downloadBtn-{{ loop.index }}').addEventListener('click', function() {
+                                        const targetUrl = "{{ link }}";
+
+                                        const a = document.createElement('a');
+                                        a.href = targetUrl;
+                                        a.download = 'video.mp4';
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                    });
+                                });
+                            </script>
                         </li>
                         {% endif %}
                         {% endfor %}
