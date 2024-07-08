@@ -66,6 +66,7 @@ def fetch_youtube_video_info(video_url):
         }
 
         yt = YouTube(video_url)
+        print(yt)
         full_data['thumbnail'] = yt.thumbnail_url
 
         for key, quality in video_info['links']['mp4'].items():
